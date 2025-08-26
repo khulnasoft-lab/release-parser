@@ -9,7 +9,7 @@ jobs:
   check_urls:
     runs-on: ubuntu-latest
     # Do not run this job on forks, as it's not cool to query servers for nothing.
-    if: ${{ github.repository == 'khulnasoft/release-parser' }}
+    if: ${{ github.repository == 'khulnasoft-lab/release-parser' }}
     steps:
       - name: Checkout site
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
