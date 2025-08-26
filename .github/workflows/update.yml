@@ -43,7 +43,7 @@ jobs:
       - name: Clone website repository
         uses: actions/checkout@v4
         with:
-          repository: khulnasoft/release-perser
+          repository: khulnasoft-lab/release-perser
           path: website
           submodules: false
           fetch-depth: 0 # fetch all history for all branches and tags, needed for next step
