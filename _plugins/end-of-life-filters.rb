@@ -111,21 +111,22 @@ module ReleaseLogFilter
   # {{ '2021-01-01' | days_from_now | end_color }} => bg-red-000
   # {{ '2025-01-01' | end_color }} => bg-green-000
   def end_color(input)
-    if input == true
-      return 'bg-green-000'
-    elsif input == false
-      return 'bg-red-000'
-    elsif input.is_a? Integer
-      if input < 0
-        return 'bg-red-000'
-      elsif input < 120
-        return 'bg-yellow-200'
-      else
-        return 'bg-green-000'
-      end
+    # Convert input to days from now if it's a date string
+    if input.is_a?(String) && (input =~ /^\d{4}-\d{2}-\d{2}$/) # Simple date string check
+      input = days_from_now(input)
+    end
+
+    if input == true || (input.is_a?(Integer) && input >= 120)
+      'bg-green-000'
+    elsif input == false || (input.is_a?(Integer) && input < 0)
+      'bg-red-000'
+    elsif input.is_a?(Integer) && input < 120
+      'bg-yellow-200'
     else
-      # Assuming it's a date
-      return end_color(days_from_now(input))
+      # Fallback for unexpected input, or if it's not a date string and not a boolean/integer
+      # Could raise an error or return a default color, depending on desired behavior.
+      # For now, returning a default to avoid breaking existing functionality.
+      'bg-gray-000' # Or some other default/error color
     end
   end
 

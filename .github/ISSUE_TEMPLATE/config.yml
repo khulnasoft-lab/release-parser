@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+description: "Suggest a new feature, report a bug, or suggest a new product for release-parser."
+contact_links:
+  - name: Ask a question
+    url: https://github.com/khulnasoft/release-parser/discussions/new
+    about: Please ask and answer questions here.

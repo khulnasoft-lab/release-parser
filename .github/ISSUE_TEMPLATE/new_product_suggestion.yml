@@ -1,0 +1,34 @@
+name: New product suggestion
+description: Suggest a new product for release-parser
+title: ""
+labels: ["request"]
+assignees: ""
+body:
+  - type: input
+    id: product-name
+    attributes:
+      label: Full and short name of product
+      description: Let us know the long, full name and, if it has one, the short name (for example, PowerShell and pwsh).
+    validations:
+      required: true
+  - type: textarea
+    id: lts-versions
+    attributes:
+      label: Does this product have LTS versions? What are the intervals between each LTS version?
+      description: For example, a current release is a release that occurs between LTS releases. Current releases can contain critical fixes.
+    validations:
+      required: false
+  - type: input
+    id: website
+    attributes:
+      label: What is the website for the product and for its version information?
+      description: "For example: https://github.com/PowerShell/PowerShell/tags"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the product which you want us to add release-parser.
+    validations:
+      required: false

@@ -17,6 +17,9 @@ plugins:
   - jekyll-last-modified-at
   - jemoji
 
+sass:
+  style: compressed
+
 
 # just-the-docs settings, see https://just-the-docs.com/
 theme: just-the-docs

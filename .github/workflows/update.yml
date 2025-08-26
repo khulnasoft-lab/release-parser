@@ -43,7 +43,7 @@ jobs:
       - name: Clone website repository
         uses: actions/checkout@v4
         with:
-          repository: khulnasoft-lab/release-perser
+          repository: khulnasoft-lab/release-parser
           path: website
           submodules: false
           fetch-depth: 0 # fetch all history for all branches and tags, needed for next step
@@ -64,12 +64,23 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use a recent LTS version
+
+      - name: Install Terser
+        run: npm install terser -g
+
+      - name: Minify JavaScript
+        run: terser assets/register-show-hidden-releases-handler.js -o assets/register-show-hidden-releases-handler.js
+
       - name: Update release data
         id: update_data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true # commit even if the data was not fully updated
-        run: python update.py
+        run: cd website && python update.py
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5

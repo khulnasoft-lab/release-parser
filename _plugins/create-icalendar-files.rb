@@ -65,6 +65,33 @@ def notification_message(product, cycle, type)
   end
 end
 
+def add_alarms_to_event(event, date)
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = Icalendar::Values::DateTime.new((date << 12).to_datetime + Rational(9, 24))
+  end
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = Icalendar::Values::DateTime.new((date << 6).to_datetime + Rational(9, 24))
+  end
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = Icalendar::Values::DateTime.new((date << 3).to_datetime + Rational(9, 24))
+  end
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = Icalendar::Values::DateTime.new((date << 1).to_datetime + Rational(9, 24))
+  end
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = '-P6DT9H'
+  end
+  event.alarm do |a|
+    a.action = 'DISPLAY'
+    a.trigger = 'PT9H'
+  end
+end
+
 def process_product(product)
   FileUtils.mkdir_p(CALENDAR_DIR)
 
@@ -80,31 +107,7 @@ def process_product(product)
       event.description = notification_message(product.title, cycle.fetch('name'), key)
       event.categories = [key]
       event.url = product.link
-      next if key != 'eol'
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = Icalendar::Values::DateTime.new((item << 12).to_datetime + Rational(9, 24))
-      end
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = Icalendar::Values::DateTime.new((item << 6).to_datetime + Rational(9, 24))
-      end
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = Icalendar::Values::DateTime.new((item << 3).to_datetime + Rational(9, 24))
-      end
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = Icalendar::Values::DateTime.new((item << 1).to_datetime + Rational(9, 24))
-      end
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = '-P6DT9H'
-      end
-      event.alarm do |a|
-        a.action = 'DISPLAY'
-        a.trigger = 'PT9H'
-      end
+      add_alarms_to_event(event, item) if key == 'eol'
     end
   end
   output_file = icalendar_filename(CALENDAR_DIR, product.permalink)

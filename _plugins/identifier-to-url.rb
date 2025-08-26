@@ -6,45 +6,59 @@ require 'jekyll'
 class IdentifierToUrl
 
   def render(identifier_hash)
-    if identifier_hash.size != 1 or not identifier_hash.values[0].kind_of?(String)
+    if identifier_hash.size != 1 || !identifier_hash.values[0].kind_of?(String)
       raise "expecting an identifier hash with a single string value, got #{identifier_hash}"
     end
 
     type = identifier_hash.keys[0]
     identifier = identifier_hash.values[0]
-    if ['cpe'].include?(type)
-      # Regex found on https://csrc.nist.gov/schema/cpe/2.3/cpe-naming_2.3.xsd.
-      # Regex for 2.3 has been simplified as I coud not make it work with Ruby.
-      cpe2_2_regex = /^[c][pP][eE]:\/[AHOaho]?(:[A-Za-z0-9\._\-~%]*){0,6}$/
-      if identifier.match(cpe2_2_regex)
-        # No known way to generate URLs for CPEs
-        return nil
+
+    handler_methods = {
+      'cpe' => :_handle_cpe_identifier,
+      'repology' => :_build_repology_url,
+      'purl' => :_handle_purl_identifier
+    }
+
+    handler = handler_methods[type]
+    if handler
+      if handler == :_handle_cpe_identifier
+        send(handler, identifier)
+      elsif handler == :_handle_purl_identifier
+        send(handler, identifier)
+      else
+        send(handler, identifier)
       end
-
-      cpe2_3_regex = /^[c][pP][eE]:2\.3:[AHOaho]?(:[A-Za-z0-9\._\-~%]*){0,6}$/
-      if identifier.match(cpe2_3_regex)
-        return "https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString=#{identifier}"
-      end
-
-      raise "Invalid CPE: should match either #{cpe2_2_regex} for CPE 2.2 or #{cpe2_3_regex} for CPE 2.3"
-
-    elsif type == 'repology'
-      return _build_repology_url(identifier)
-
-    elsif type == 'purl'
-      begin
-        purl = PackageURL.parse(identifier)
-        raise "Cannot handle PURL with no name or type: #{identifier}" unless purl.type and purl.name # should be impossible
-
-        method_name = "_build_#{purl.type}_url"
-        raise "Missing method handler #{method_name} for PURL type #{purl.type}" unless respond_to?(method_name)
-        return send(method_name, purl)
-      rescue => e
-        raise "Invalid PURL identifier: #{identifier} : #{e}"
-      end
-
     else
       raise "Unsupported identifier type: #{type}"
+    end
+  end
+
+  private
+
+  def _handle_cpe_identifier(identifier)
+    cpe2_2_regex = /^[c][pP][eE]:\/[AHOaho]?(:[A-Za-z0-9\._\-~%]*){0,6}$/
+    if identifier.match(cpe2_2_regex)
+      return nil
+    end
+
+    cpe2_3_regex = /^[c][pP][eE]:2\.3:[AHOaho]?(:[A-Za-z0-9\._\-~%]*){0,6}$/
+    if identifier.match(cpe2_3_regex)
+      return "https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString=#{identifier}"
+    end
+
+    raise "Invalid CPE: should match either #{cpe2_2_regex} for CPE 2.2 or #{cpe2_3_regex} for CPE 2.3"
+  end
+
+  def _handle_purl_identifier(identifier)
+    begin
+      purl = PackageURL.parse(identifier)
+      raise "Cannot handle PURL with no name or type: #{identifier}" unless purl.type and purl.name
+
+      method_name = "_build_#{purl.type}_url"
+      raise "Missing method handler #{method_name} for PURL type #{purl.type}" unless respond_to?(method_name)
+      return send(method_name, purl)
+    rescue => e
+      raise "Invalid PURL identifier: #{identifier} : #{e}"
     end
   end
 

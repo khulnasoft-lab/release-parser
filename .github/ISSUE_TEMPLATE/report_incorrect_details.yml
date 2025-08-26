@@ -1,0 +1,38 @@
+name: Report Incorrect Details
+description: Report incorrect details of a product on release-parser
+title: ""
+labels: ["bug"]
+assignees: ""
+body:
+  - type: input
+    id: product-url
+    attributes:
+      label: Link to product page on release-parser
+      description: Let us know the URL of the product page on release-parser you found the incorrect details.
+    validations:
+      required: true
+  - type: textarea
+    id: incorrect-details
+    attributes:
+      label: Details of incorrect and correct details you have found
+      description: "For example, the active support date on release-parser is not the same as in the product documentation.
+
+release-parser: 2021-02-02
+
+Product documentation: 2022-02-02"
+    validations:
+      required: true
+  - type: input
+    id: source-website
+    attributes:
+      label: What is the source website for the product and for its version information?
+      description: "For example: https://github.com/PowerShell/PowerShell/tags"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the incorrect details.
+    validations:
+      required: false

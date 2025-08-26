@@ -121,6 +121,17 @@ module ReleaseLogHooks
     Jekyll.logger.debug TOPIC, "Validating '#{product.name}'..."
 
     error_if = Validator.new('product', product, product.data)
+
+    validate_product_root_data(error_if, product)
+    validate_product_identifiers(error_if, product)
+    validate_product_auto_data(error_if, product)
+    validate_product_custom_columns(error_if, product)
+    validate_product_releases(error_if, product)
+
+    Jekyll.logger.debug TOPIC, "Product '#{product.name}' successfully validated in #{(Time.now - start).round(3)} seconds."
+  end
+
+  def self.validate_product_root_data(error_if, product)
     error_if.is_not_a_string('title')
     error_if.is_not_in('category', ReleaseLogHooks::VALID_CATEGORIES)
     error_if.does_not_match('tags', /^[a-z0-9\-]+( [a-z0-9\-]+)*$/) if product.data.has_key?('tags')
@@ -145,16 +156,22 @@ module ReleaseLogHooks
     error_if.is_not_an_array('identifiers')
     error_if.is_not_an_array('releases')
     error_if.not_ordered_by_release_cycles('releases')
+  end
 
+  def self.validate_product_identifiers(error_if, product)
     product.data['identifiers'].each { |identifier|
       error_if.is_not_an_identifier('identifiers', identifier)
     }
+  end
 
+  def self.validate_product_auto_data(error_if, product)
     if product.data.has_key?('auto')
       error_if = Validator.new('auto', product, product.data['auto'])
       error_if.is_not_an_array('methods')
     end
+  end
 
+  def self.validate_product_custom_columns(error_if, product)
     product.data['customColumns'].each { |column|
       error_if = Validator.new('customColumns', product, column)
       error_if.is_not_a_string('property')
@@ -163,7 +180,9 @@ module ReleaseLogHooks
       error_if.is_not_a_string('description') if column.has_key?('description')
       error_if.is_not_an_url('link') if column.has_key?('link')
     }
+  end
 
+  def self.validate_product_releases(error_if, product)
     product.data['releases'].each { |release|
       error_if = Validator.new('releases', product, release)
       error_if.is_not_a_string('releaseCycle')
@@ -187,8 +206,6 @@ module ReleaseLogHooks
       error_if.is_not_before('eoas', 'eoes') if product.data['eoasColumn'] and product.data['eoesColumn']
       error_if.is_not_before('eol', 'eoes') if product.data['eolColumn'] and product.data['eoesColumn']
     }
-
-    Jekyll.logger.debug TOPIC, "Product '#{product.name}' successfully validated in #{(Time.now - start).round(3)} seconds."
   end
 
   def self.validate_urls(product)
@@ -349,7 +366,7 @@ module ReleaseLogHooks
 
     # Retrieve all urls in the given markdown-formatted text and check them.
     def contains_invalid_urls(markdown)
-      urls = markdown.scan(/]\((?<matching>http[^)"]+)/).flatten # matches [text](url) or [text](url "title")
+      urls = markdown.scan(/]\(?<matching>http[^)"]+)/).flatten # matches [text](url) or [text](url "title")
       urls += markdown.scan(/<(?<matching>http[^>]+)/).flatten # matches <url>
       urls += markdown.scan(/: (?<matching>http[^"\n]+)/).flatten # matches [id]: url or [id]: url "title"
       urls.each do |url|

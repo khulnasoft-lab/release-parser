@@ -35,11 +35,8 @@ module ReleaseLog
     end
 
     def add_to_map(map, key, page)
-      if map.has_key? key
-        map[key] << page
-      else
-        map[key] = [page]
-      end
+      map[key] ||= [] # Initialize with an empty array if key doesn't exist
+      map[key] << page
     end
   end
 
